@@ -7,6 +7,7 @@ Author:jmr,MrRedStone9947
 
 ## 目前的已知bug
 | 是否解决 | 内容 | bug发现者
+
 | x | 完全用不了 | jmr
 
 ## 目前的改进方法
