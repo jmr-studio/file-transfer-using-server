@@ -7,7 +7,7 @@ Author:jmr,MrRedStone9947
 
 ## 目前的已知bug
 | 是否解决 | 内容 | bug发现者
-
+| x | 完全用不了 | jmr
 
 ## 目前的改进方法
 | 是否完成 | 内容 | 改进发现者
@@ -17,3 +17,4 @@ Author:jmr,MrRedStone9947
 
 qwq1.0 | jmr,MrRedStone9947
 - 更新基本框架
+- 代码崩了
