@@ -5,6 +5,9 @@
 Author:jmr,MrRedStone9947
 
 
+该死的jmr，不帮我写客户端，明天刀了他 :(
+
+
 ## 目前的已知bug
 | 是否解决 | 内容 | bug发现者
 
