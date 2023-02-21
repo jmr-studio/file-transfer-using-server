@@ -51,41 +51,41 @@ def sendFile(client,file_id):
     print("耗时:{0}s".format(round(end_time-st_time,2)))
 
 if __name__ == '__main__':
-    ip_list=input(">>").split(',')
+    ip=input(">>").split(',')
     client=socket.socket()
-    client.settimeout(5)
-    f=0
-    for ip in ip_list:
-        try:
-            client.connect((ip,8001))
-            f=1
-            print(ip)
-            break
-        except Exception as err:
-            print(err)
-    client.settimeout(None)
-    if f:
-        request={'connection_type':'MAIN_CLIENT','user_name':'TEST'}
-        message=base64.b64encode(json.dumps(request).encode(encoding='utf-8'))
+    client.connect((ip,8001))
+
+    connection_info={'connection_type':'MAIN_CLIENT','user_name':'TEST'}
+    message=base64.b64encode(json.dumps(connection_info).encode(encoding='utf-8'))
+    client.sendall(message)
+
+    feedback=base64.b64decode(client.recv(1024)).decode(encoding='utf-8')
+    if feedback=='Successfully Connected':
+        print('连接成功！')
+        message=base64.b64encode('Data Received'.encode(encoding='utf-8'))
         client.sendall(message)
 
-        print("连接成功！等待对方响应...")
+        target_ip=input('输入要发送文件的ip\n>>:')
+        request={'target_ip':ip}
+        message=base64.b64encode(json.dumps(request).encode(encoding='utf-8'))
+        client.sendall(request)
+        #写到这里
+
+
+        file_dir=getFileDir()
+        file_name,file_ex,file_size=getFileHeader(file_dir)
+
+        id=createId()
+        transfer_list[id]={"file_dir":file_dir,'file_name':file_name,'file_ex':file_ex,
+                           "file_size":file_size,"send_size":0,"progress":0}
+
+        header={'file_id':id,'file_name':file_name,'file_ex':file_ex,'file_size':file_size}
+        client.sendall(base64.b64encode(json.dumps(header).encode(encoding='utf-8')))
         feedback=base64.b64decode(client.recv(1024)).decode(encoding='utf-8')
-        if feedback=='Successfully Connected':
-            file_dir=getFileDir()
-            file_name,file_ex,file_size=getFileHeader(file_dir)
 
-            id=createId()
-            transfer_list[id]={"file_dir":file_dir,'file_name':file_name,'file_ex':file_ex,
-                               "file_size":file_size,"send_size":0,"progress":0}
-
-            header={'file_id':id,'file_name':file_name,'file_ex':file_ex,'file_size':file_size}
-            client.sendall(base64.b64encode(json.dumps(header).encode(encoding='utf-8')))
-            feedback=base64.b64decode(client.recv(1024)).decode(encoding='utf-8')
-
-            sendFile(client,id)
-        else:
-            if feedback=='Too Many Connections':
-                print("连接数量太多，请稍后再试")
-            if feedback=='Connection Refused':
-                print("对方拒绝了传输")
+        sendFile(client,id)
+    else:
+        if feedback=='Too Many Connections':
+            print("连接数量太多，请稍后再试")
+        if feedback=='Connection Refused':
+            print("对方拒绝了传输")

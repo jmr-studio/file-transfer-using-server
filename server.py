@@ -15,7 +15,7 @@ class TCPServer():
         self.ip_list=ip_list
         self.port=port
         self.server=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        self.client_count=0
+        self.clients=dict()
         self.transfer_list=dict()
     def recvFile(self,client,file_id):
         st_time=time.time()
@@ -52,38 +52,40 @@ class TCPServer():
     def _start(self):
         client,addr=self.server.accept()
         threading.Thread(target=self._start).start()
-        # print(addr)
+        print(addr)
+        connection_info=json.loads(base64.b64decode(client.recv(1024)).decode(encoding='utf-8'))
+        if len(self.clients)>=10:
+            message=base64.b64encode('Too Many Connections'.encode(encoding='utf-8'))
+            client.sendall(message)
+            return
+        else:
+            message=base64.b64encode('Successfully Connected'.encode(encoding='utf-8'))
+            client.sendall(message)
 
-        request=json.loads(base64.b64decode(client.recv(1024)).decode(encoding='utf-8'))
-        if request['connection_type']=='MAIN_CLIENT':
-            if self.client_count>=10:
-                message=base64.b64encode('Too Many Connections'.encode(encoding='utf-8'))
-                client.sendall(message)
-                return
-            else:
-                op=int(input(request['user_name']+'想要向您传输文件(0拒绝，1同意)\n>>:'))
-                if op:
-                    mutex.acquire()
-                    self.client_count+=1
+            mutex.acquire()
+            id=createId()
+            self.clients[id]={'ip':addr[0],'user_name':connection_info['user_name'],'connection':client}
+            mutex.release()
 
-                    message=base64.b64encode('Successfully Connected'.encode(encoding='utf-8'))
-                    client.sendall(message)
+            feedback=base64.b64decode(client.recv(1024)).decode(encoding='utf-8')
+            client.sendall(base64.b64encode(json.dumps({'id':id}).encode(encoding='utf-8')))
 
-                    file_id,file_name,file_ex,file_size=json.loads(base64.b64decode(client.recv(1024))
+            request=json.loads(base64.b64decode(client.recv(1024)).decode(encoding='utf-8'))
+            #写到这里
+
+            file_id,file_name,file_ex,file_size=json.loads(base64.b64decode(client.recv(1024))
                                                                    .decode(encoding='utf-8')).values()
-                    # print(file_id,file_name,file_ex,file_size)
-                    self.transfer_list[file_id]={'file_name':file_name,'file_ex':file_ex,
-                                                 'file_size':file_size,'recv_size':0,'progress':0}
-                    mutex.release()
+            # print(file_id,file_name,file_ex,file_size)
 
-                    message=base64.b64encode("Data Received".encode(encoding='utf-8'))
-                    client.sendall(message)
 
-                    self.recvFile(client,file_id)
-                else:
-                    message=base64.b64encode('Connection Refused'.encode(encoding='utf-8'))
-                    client.sendall(message)
-                    return
+            message=base64.b64encode("Data Received".encode(encoding='utf-8'))
+            client.sendall(message)
+
+            self.recvFile(client,file_id)
+        else:
+            message=base64.b64encode('Connection Refused'.encode(encoding='utf-8'))
+            client.sendall(message)
+            return
 
     def run(self):
         self.server.bind(('0.0.0.0',self.port))
