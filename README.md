@@ -5,7 +5,7 @@
 Author:jmr,MrRedStone9947
 
 
-该死的jmr，不帮我写客户端，明天刀了他 :(
+该死的jmr，不帮我写GUI，明天刀了他 :(
 
 
 ## 目前的已知bug
@@ -22,3 +22,6 @@ Author:jmr,MrRedStone9947
 qwq1.0 | jmr,MrRedStone9947
 - 更新基本框架
 - 代码崩了
+
+2023/2/22 qwq 1.1!!!!!! 终于，在这个晚上，完成啦！！ 
+目前代码可以使用，有小瑕疵   MrRedStone9947
